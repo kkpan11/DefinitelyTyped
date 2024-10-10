@@ -2,15 +2,13 @@ import { Camera } from "../../../cameras/Camera.js";
 import { Object3D } from "../../../core/Object3D.js";
 import { Material } from "../../../materials/Material.js";
 import { Color } from "../../../math/Color.js";
-import {
-    ComputeNode,
-    LightsNode,
-    Node,
-    NodeBuilder,
-    NodeFrame,
-    ShaderNodeObject,
-    UniformGroupNode,
-} from "../../../nodes/Nodes.js";
+import Node from "../../../nodes/core/Node.js";
+import NodeBuilder from "../../../nodes/core/NodeBuilder.js";
+import UniformGroupNode from "../../../nodes/core/UniformGroupNode.js";
+import ComputeNode from "../../../nodes/gpgpu/ComputeNode.js";
+import LightsNode from "../../../nodes/lighting/LightsNode.js";
+import { NodeFrame } from "../../../nodes/Nodes.js";
+import { ShaderNodeObject } from "../../../nodes/TSL.js";
 import { Fog } from "../../../scenes/Fog.js";
 import { FogExp2 } from "../../../scenes/FogExp2.js";
 import { Scene } from "../../../scenes/Scene.js";
@@ -40,6 +38,13 @@ interface SceneData {
     fogNode?: Node | undefined;
     environment?: Texture | undefined;
     environmentNode?: Node | undefined;
+}
+declare module "../../../scenes/Scene.js" {
+    interface Scene {
+        environmentNode?: Node | null | undefined;
+        backgroundNode?: Node | null | undefined;
+        fogNode?: Node | null | undefined;
+    }
 }
 declare class Nodes extends DataMap<{
     nodeUniformsGroup: {
@@ -103,6 +108,7 @@ declare class Nodes extends DataMap<{
     updateAfter(renderObject: RenderObject): void;
     updateForCompute(computeNode: ComputeNode): void;
     updateForRender(renderObject: RenderObject): void;
+    needsRefresh(renderObject: RenderObject): boolean;
     dispose(): void;
 }
 export default Nodes;

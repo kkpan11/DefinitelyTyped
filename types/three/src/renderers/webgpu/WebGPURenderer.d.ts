@@ -5,6 +5,10 @@ export interface WebGPURendererParameters extends RendererParameters, WebGPUBack
     forceWebGL?: boolean | undefined;
 }
 
-export default class WebGPURenderer extends Renderer {
+declare class WebGPURenderer extends Renderer {
+    readonly isWebGPURenderer: true;
+
     constructor(parameters?: WebGPURendererParameters);
 }
+
+export default WebGPURenderer;

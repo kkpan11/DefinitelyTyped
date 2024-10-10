@@ -1,35 +1,54 @@
-import { ColorSpace } from "../../constants.js";
+import { ColorSpace, LinearSRGBColorSpace, SRGBColorSpace } from "../../constants.js";
 import Node from "../core/Node.js";
+import NodeBuilder from "../core/NodeBuilder.js";
 import TempNode from "../core/TempNode.js";
-import { NodeRepresentation, ShaderNodeObject } from "../shadernode/ShaderNode.js";
+import { NodeRepresentation, ShaderNodeObject } from "../tsl/TSLCore.js";
 
-export type ColorSpaceNodeMethod =
-    | typeof ColorSpaceNode.LINEAR_TO_LINEAR
-    | typeof ColorSpaceNode.LINEAR_TO_sRGB
-    | typeof ColorSpaceNode.sRGB_TO_LINEAR;
+export type WorkingOrOutputColorSpace = "WorkingColorSpace" | "OutputColorSpace";
+
+export type ColorSpaceMethod = "LinearTosRGB" | "sRGBToLinear" | "LinearToLinear" | "sRGBTosRGB";
+
+export function getColorSpaceMethod(
+    source: typeof LinearSRGBColorSpace | typeof SRGBColorSpace,
+    target: typeof LinearSRGBColorSpace | typeof SRGBColorSpace,
+): ColorSpaceMethod;
 
 export default class ColorSpaceNode extends TempNode {
-    static LINEAR_TO_LINEAR: "LinearToLinear";
-    static LINEAR_TO_sRGB: "LinearTosRGB";
-    static sRGB_TO_LINEAR: "sRGBToLinear";
+    colorNode: Node;
+    source: WorkingOrOutputColorSpace | ColorSpace;
+    target: WorkingOrOutputColorSpace | ColorSpace;
 
-    method: ColorSpaceNodeMethod;
-    node: Node;
+    constructor(
+        colorNode: Node,
+        source: WorkingOrOutputColorSpace | ColorSpace,
+        target: WorkingOrOutputColorSpace | ColorSpace,
+    );
 
-    constructor(method: ColorSpaceNodeMethod | null, node: Node);
+    getColorSpace(nodeBuilder: NodeBuilder, colorSpace: WorkingOrOutputColorSpace): ColorSpace;
 }
 
-export const linearToColorSpace: (node: NodeRepresentation, colorSpace: ColorSpace) => ShaderNodeObject<ColorSpaceNode>;
-export const colorSpaceToLinear: (node: NodeRepresentation, colorSpace: ColorSpace) => ShaderNodeObject<ColorSpaceNode>;
+export const toOutputColorSpace: (
+    node: NodeRepresentation,
+) => ShaderNodeObject<ColorSpaceNode>;
+export const toWorkingColorSpace: (
+    node: NodeRepresentation,
+) => ShaderNodeObject<ColorSpaceNode>;
 
-export const linearTosRGB: (node: NodeRepresentation) => ShaderNodeObject<ColorSpaceNode>;
-export const sRGBToLinear: (node: NodeRepresentation) => ShaderNodeObject<ColorSpaceNode>;
+export const workingToColorSpace: (
+    node: NodeRepresentation,
+    colorSpace: ColorSpace,
+) => ShaderNodeObject<ColorSpaceNode>;
+export const colorSpaceToWorking: (
+    node: NodeRepresentation,
+    colorSpace: ColorSpace,
+) => ShaderNodeObject<ColorSpaceNode>;
 
-declare module "../shadernode/ShaderNode.js" {
+declare module "../tsl/TSLCore.js" {
     interface NodeElements {
-        linearTosRGB: typeof linearTosRGB;
-        sRGBToLinear: typeof sRGBToLinear;
-        linearToColorSpace: typeof linearToColorSpace;
-        colorSpaceToLinear: typeof colorSpaceToLinear;
+        toOutputColorSpace: typeof toOutputColorSpace;
+        toWorkingColorSpace: typeof toWorkingColorSpace;
+
+        workingToColorSpace: typeof workingToColorSpace;
+        colorSpaceToWorking: typeof colorSpaceToWorking;
     }
 }

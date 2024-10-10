@@ -40,6 +40,7 @@ export * from "./core/Raycaster.js";
 export * from "./core/RenderTarget.js";
 export * from "./core/Uniform.js";
 export * from "./core/UniformsGroup.js";
+export * from "./extras/Controls.js";
 export * from "./extras/core/Curve.js";
 export * from "./extras/core/CurvePath.js";
 export * from "./extras/core/Path.js";
@@ -157,6 +158,13 @@ export type {
     XRJointSpace,
     XRTargetRaySpace,
 } from "./renderers/webxr/WebXRController.js";
+export type { WebXRDepthSensing } from "./renderers/webxr/WebXRDepthSensing.js";
+export type {
+    WebXRArrayCamera,
+    WebXRCamera,
+    WebXRManager,
+    WebXRManagerEventMap,
+} from "./renderers/webxr/WebXRManager.js";
 export * from "./scenes/Fog.js";
 export * from "./scenes/FogExp2.js";
 export * from "./scenes/Scene.js";
@@ -177,7 +185,13 @@ export * from "./Three.Legacy.js";
 export { createCanvasElement } from "./utils.js";
 
 export { default as IESSpotLight } from "./lights/webgpu/IESSpotLight.js";
+export { default as NodeLoader } from "./loaders/nodes/NodeLoader.js";
+export { default as NodeMaterialLoader } from "./loaders/nodes/NodeMaterialLoader.js";
+export { default as NodeObjectLoader } from "./loaders/nodes/NodeObjectLoader.js";
+export * from "./materials/nodes/NodeMaterials.js";
 export * from "./nodes/Nodes.js";
+export * from "./nodes/TSL.js";
+export { default as BundleGroup } from "./renderers/common/BundleGroup.js";
 export { default as PMREMGenerator } from "./renderers/common/extras/PMREMGenerator.js";
 export { default as PostProcessing } from "./renderers/common/PostProcessing.js";
 export { default as QuadMesh } from "./renderers/common/QuadMesh.js";

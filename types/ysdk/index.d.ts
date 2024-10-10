@@ -17,11 +17,19 @@ export interface SDK {
 
     deviceInfo: DeviceInfo;
 
-    features: Partial<{
+    features: {
         LoadingAPI: {
             ready(): void;
         };
-    }>;
+        GameplayAPI: {
+            start(): void;
+            stop(): void;
+        };
+        GamesAPI: {
+            getAllGames(): Promise<{ games: Game[]; developerURL: string }>;
+            getGameByID(id: number): Promise<{ game?: Game; isAvailable: boolean }>;
+        };
+    };
 
     clipboard: {
         writeText(text: string): void;
@@ -105,6 +113,16 @@ export interface SDK {
     getFlags(params?: GetFlagsParams): Promise<Record<string, string>>;
 
     isAvailableMethod(methodName: string): Promise<boolean>;
+
+    serverTime(): number;
+}
+
+interface Game {
+    appID: string;
+    title: string;
+    url: string;
+    coverURL: string;
+    iconURL: string;
 }
 
 interface ClientFeature {

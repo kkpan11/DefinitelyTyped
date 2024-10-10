@@ -14,6 +14,7 @@ declare class ClippingContext {
     planes: Vector4[];
     parentVersion: number;
     viewNormalMatrix: Matrix3;
+    cacheKey: number;
     viewMatrix?: Matrix4 | undefined;
     constructor();
     projectPlanes(source: readonly Plane[], offset: number): void;

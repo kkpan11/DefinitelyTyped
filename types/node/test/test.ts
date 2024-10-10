@@ -11,6 +11,7 @@ import {
     only,
     run,
     skip,
+    snapshot,
     suite,
     type SuiteContext,
     test,
@@ -27,6 +28,7 @@ run();
 // $ExpectType TestsStream
 run({
     concurrency: false,
+    globPatterns: ["*.spec.js"],
 });
 
 // run with all options and number concurrency
@@ -101,7 +103,7 @@ test((t, cb) => {
     cb({ x: "anything" });
 });
 
-// Test the context's methods
+// Test the context's methods/properties
 test(undefined, undefined, t => {
     // $ExpectType void
     t.diagnostic("tap diagnostic");
@@ -116,13 +118,36 @@ test(undefined, undefined, t => {
     // $ExpectType void
     t.todo();
     // $ExpectType void
-    t.after(() => {});
+    t.after(t => {
+        // $ExpectType TestContext
+        t;
+    });
     // $ExpectType void
-    t.afterEach(() => {});
+    t.afterEach(t => {
+        // $ExpectType TestContext
+        t;
+    });
     // $ExpectType void
-    t.beforeEach(() => {});
+    t.beforeEach(t => {
+        // $ExpectType TestContext
+        t;
+    });
     // $ExpectType void
-    t.before(() => {});
+    t.before(t => {
+        // $ExpectType TestContext
+        t;
+    });
+
+    // $ExpectType string
+    t.name;
+    // $ExpectType string | undefined
+    t.filePath;
+    // $ExpectType string
+    t.fullName;
+    // $ExpectType AbortSignal
+    t.signal;
+    // $ExpectType MockTracker
+    t.mock;
 });
 
 // Test the subtest approach.
@@ -318,6 +343,8 @@ describe(s => {
     s;
     // $ExpectType string
     s.name;
+    // $ExpectType string | undefined
+    s.filePath;
 });
 
 // Test callback mode
@@ -446,33 +473,33 @@ beforeEach(() => {});
 after(() => {});
 beforeEach(() => {});
 // - with callback
-before((s, cb) => {
-    // $ExpectType SuiteContext
-    s;
+before((c, cb) => {
+    // $ExpectType TestContext | SuiteContext
+    c;
     // $ExpectType (result?: any) => void
     cb;
     // $ExpectType void
     cb({ x: "anything" });
 });
-beforeEach((s, cb) => {
-    // $ExpectType SuiteContext
-    s;
+beforeEach((c, cb) => {
+    // $ExpectType TestContext | SuiteContext
+    c;
     // $ExpectType (result?: any) => void
     cb;
     // $ExpectType void
     cb({ x: "anything" });
 });
-after((s, cb) => {
-    // $ExpectType SuiteContext
-    s;
+after((c, cb) => {
+    // $ExpectType TestContext | SuiteContext
+    c;
     // $ExpectType (result?: any) => void
     cb;
     // $ExpectType void
     cb({ x: "anything" });
 });
-afterEach((s, cb) => {
-    // $ExpectType SuiteContext
-    s;
+afterEach((c, cb) => {
+    // $ExpectType TestContext | SuiteContext
+    c;
     // $ExpectType (result?: any) => void
     cb;
     // $ExpectType void
@@ -768,6 +795,25 @@ test("mocks a setter", (t) => {
     }
 });
 
+test("mocks a module", (t) => {
+    // $ExpectType MockModuleContext
+    const mock = t.mock.module("node:readline", {
+        namedExports: {
+            fn() {
+                return 42;
+            },
+        },
+        defaultExport: {
+            foo() {
+                return "bar";
+            },
+        },
+        cache: true,
+    });
+    // $ExpectType void
+    mock.restore();
+});
+
 // @ts-expect-error
 dot();
 // $ExpectType AsyncGenerator<"\n" | "." | "X", void, unknown> || AsyncGenerator<"\n" | "." | "X", void, any>
@@ -776,13 +822,17 @@ dot("" as any);
 tap();
 // $ExpectType AsyncGenerator<string, void, unknown> || AsyncGenerator<string, void, any>
 tap("" as any);
-// $ExpectType Spec
+// $ExpectType SpecReporter
 new spec();
+// $ExpectType SpecReporter
+spec();
 // @ts-expect-error
 junit();
 // $ExpectType AsyncGenerator<string, void, unknown> || AsyncGenerator<string, void, any>
 junit("" as any);
-// $ExpectType Lcov
+// @ts-expect-error (TODO: change to expect type LcovReporter once lcov is a wrapper function)
+lcov();
+// @ts-expect-error (TODO: change to expect type LcovReporter once lcov is a wrapper function)
 new lcov();
 
 describe("Mock Timers Test Suite", () => {
@@ -941,10 +991,41 @@ test("planning with streams", (t: TestContext, done) => {
 
     const stream = Readable.from(generate());
     stream.on("data", (chunk) => {
-        t.assert.strictEqual(chunk, expected.shift());
+        t.assert.strictEqual(chunk, expected.shift()!);
+
+        // $ExpectType string
+        chunk;
     });
 
     stream.on("end", () => {
         done();
     });
+});
+
+// Test snapshot assertion.
+test(t => {
+    // $ExpectType void
+    t.assert.snapshot({ value1: true, value2: false });
+    // $ExpectType void
+    t.assert.snapshot({ value3: "foo", value4: "bar" }, { serializers: [value => JSON.stringify(value)] });
+});
+
+// Snapshot configuration
+// @ts-expect-error
+snapshot.setDefaultSnapshotSerializers();
+// @ts-expect-error
+snapshot.setDefaultSnapshotSerializers((value) => value);
+// $ExpectType void
+snapshot.setDefaultSnapshotSerializers([
+    (value) => {
+        value; // $ExpectType any
+        return value;
+    },
+]);
+// @ts-expect-error
+snapshot.setResolveSnapshotPath();
+// $ExpectType void
+snapshot.setResolveSnapshotPath((path) => {
+    path; // $ExpectType string | undefined
+    return `${path ?? "repl"}.snapshot`;
 });

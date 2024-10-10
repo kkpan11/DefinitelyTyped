@@ -127,7 +127,7 @@ export class Object3D<TEventMap extends Object3DEventMap = Object3DEventMap> ext
      * Sub-classes will update this value.
      * @defaultValue `Object3D`
      */
-    readonly type: string | "Object3D";
+    readonly type: string;
 
     /**
      * Object's parent in the {@link https://en.wikipedia.org/wiki/Scene_graph | scene graph}.
@@ -299,6 +299,7 @@ export class Object3D<TEventMap extends Object3DEventMap = Object3DEventMap> ext
     onBeforeShadow(
         renderer: WebGLRenderer,
         scene: Scene,
+        camera: Camera,
         shadowCamera: Camera,
         geometry: BufferGeometry,
         depthMaterial: Material,
@@ -317,6 +318,7 @@ export class Object3D<TEventMap extends Object3DEventMap = Object3DEventMap> ext
     onAfterShadow(
         renderer: WebGLRenderer,
         scene: Scene,
+        camera: Camera,
         shadowCamera: Camera,
         geometry: BufferGeometry,
         depthMaterial: Material,
